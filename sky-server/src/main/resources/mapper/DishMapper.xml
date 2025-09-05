@@ -5,4 +5,13 @@
     <insert id="addDish" parameterType="com.sky.entity.Dish" keyProperty="id" useGeneratedKeys="true">
         insert into dish values (null, #{name}, #{categoryId}, #{price}, #{image}, #{description}, #{status}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
     </insert>
+    <select id="pageQuery" parameterType="com.sky.dto.DishPageQueryDTO" resultType="com.sky.vo.DishVO">
+        select d.*,c.name from dish d left join category c on d.category_id = c.id
+        <where>
+            <if test="name != null and name != ''"> and d.name like concat('%', #{name}, '%')</if>
+            <if test="categoryId != null"> and d.category_id = #{categoryId}</if>
+            <if test="status != null"> and d.status = #{status}</if>
+        </where>
+        order by d.create_time desc
+    </select>
 </mapper>
