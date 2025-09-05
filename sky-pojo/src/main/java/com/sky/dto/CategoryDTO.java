@@ -4,6 +4,9 @@ import lombok.Data;
 
 import java.io.Serializable;
 
+/**
+ * @author chake
+ */
 @Data
 public class CategoryDTO implements Serializable {
 

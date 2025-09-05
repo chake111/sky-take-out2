@@ -40,18 +40,22 @@ public class DishServiceImpl implements DishService {
 
     @Override
     @Transactional
-    public void addDish(DishDTO dishDTO) {
+    public void addDish(DishDTO dto) {
         Dish dish = new Dish();
-        BeanUtils.copyProperties(dishDTO, dish);
+        BeanUtils.copyProperties(dto, dish);
         dishMapper.addDish(dish);
+        insertDishFlavor(dto, dto.getId());
+    }
+
+    private void insertDishFlavor(DishDTO dishDTO, Long dishId) {
         //口味不是必须的
         List<DishFlavor> flavorList = dishDTO.getFlavors();
         if (flavorList != null && !flavorList.isEmpty()) {
             for (DishFlavor dishFlavor : flavorList) {
-                dishFlavor.setDishId(dish.getId());
-                dishFlavorMapper.add(dishFlavor);
+                dishFlavor.setDishId(dishId);
             }
         }
+        dishFlavorMapper.insertBatch(flavorList);
     }
 
     @Override
@@ -80,6 +84,37 @@ public class DishServiceImpl implements DishService {
             dishMapper.deleteById(id);
             dishFlavorMapper.deleteByDishId(id);
         }
+    }
+
+    @Override
+    public DishVO getById(Long id) {
+        Dish dish = dishMapper.getById(id);
+        DishVO vo = new DishVO();
+        BeanUtils.copyProperties(dish, vo);
+        List<DishFlavor> dishFlavors = dishFlavorMapper.getByDishId(id);
+        vo.setFlavors(dishFlavors);
+        return vo;
+    }
+
+    @Override
+    @Transactional
+    public void update(DishDTO dto) {
+        Dish dish = new Dish();
+        BeanUtils.copyProperties(dto,dish);
+        dishMapper.update(dish);
+        Long id = dto.getId();
+        dishFlavorMapper.deleteByDishId(id);
+        insertDishFlavor(dto, id);
+    }
+
+    @Override
+    public void startOrStop(Integer status, Long id) {
+        Dish dish = Dish.builder()
+                .status(status)
+                .id(id)
+                .build();
+
+        dishMapper.update(dish);
     }
 }
 
