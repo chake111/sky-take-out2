@@ -60,4 +60,11 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
             return false;
         }
     }
+
+    @SuppressWarnings("NullableProblems")
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+        // 请求处理完成后清理线程变量，防止线程复用导致数据污染
+        BaseContext.removeCurrentId();
+    }
 }
