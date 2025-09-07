@@ -6,6 +6,7 @@ import java.io.Serializable;
 
 /**
  * C端用户登录
+ * @author chake
  */
 @Data
 public class UserLoginDTO implements Serializable {

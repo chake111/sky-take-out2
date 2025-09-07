@@ -22,6 +22,7 @@ import java.util.Map;
 
 /**
  * Http工具类
+ * @author chake
  */
 public class HttpClientUtil {
 
@@ -29,9 +30,6 @@ public class HttpClientUtil {
 
     /**
      * 发送GET方式请求
-     * @param url
-     * @param paramMap
-     * @return
      */
     public static String doGet(String url,Map<String,String> paramMap){
         // 创建Httpclient对象
@@ -60,12 +58,16 @@ public class HttpClientUtil {
                 result = EntityUtils.toString(response.getEntity(),"UTF-8");
             }
         }catch (Exception e){
+            //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }finally {
             try {
-                response.close();
+                if (response != null) {
+                    response.close();
+                }
                 httpClient.close();
             } catch (IOException e) {
+                //noinspection CallToPrintStackTrace
                 e.printStackTrace();
             }
         }
@@ -75,16 +77,12 @@ public class HttpClientUtil {
 
     /**
      * 发送POST方式请求
-     * @param url
-     * @param paramMap
-     * @return
-     * @throws IOException
      */
-    public static String doPost(String url, Map<String, String> paramMap) throws IOException {
+    public static String doPost(String url, Map<String, String> paramMap) throws Exception {
         // 创建Httpclient对象
         CloseableHttpClient httpClient = HttpClients.createDefault();
         CloseableHttpResponse response = null;
-        String resultString = "";
+        String resultString;
 
         try {
             // 创建Http Post请求
@@ -92,7 +90,7 @@ public class HttpClientUtil {
 
             // 创建参数列表
             if (paramMap != null) {
-                List<NameValuePair> paramList = new ArrayList();
+                List<NameValuePair> paramList = new ArrayList<>();
                 for (Map.Entry<String, String> param : paramMap.entrySet()) {
                     paramList.add(new BasicNameValuePair(param.getKey(), param.getValue()));
                 }
@@ -107,12 +105,13 @@ public class HttpClientUtil {
             response = httpClient.execute(httpPost);
 
             resultString = EntityUtils.toString(response.getEntity(), "UTF-8");
-        } catch (Exception e) {
-            throw e;
         } finally {
             try {
-                response.close();
+                if (response != null) {
+                    response.close();
+                }
             } catch (IOException e) {
+                //noinspection CallToPrintStackTrace
                 e.printStackTrace();
             }
         }
@@ -122,16 +121,12 @@ public class HttpClientUtil {
 
     /**
      * 发送POST方式请求
-     * @param url
-     * @param paramMap
-     * @return
-     * @throws IOException
      */
-    public static String doPost4Json(String url, Map<String, String> paramMap) throws IOException {
+    public static String doPost4Json(String url, Map<String, String> paramMap) throws Exception {
         // 创建Httpclient对象
         CloseableHttpClient httpClient = HttpClients.createDefault();
         CloseableHttpResponse response = null;
-        String resultString = "";
+        String resultString;
 
         try {
             // 创建Http Post请求
@@ -140,9 +135,7 @@ public class HttpClientUtil {
             if (paramMap != null) {
                 //构造json格式数据
                 JSONObject jsonObject = new JSONObject();
-                for (Map.Entry<String, String> param : paramMap.entrySet()) {
-                    jsonObject.put(param.getKey(),param.getValue());
-                }
+                jsonObject.putAll(paramMap);
                 StringEntity entity = new StringEntity(jsonObject.toString(),"utf-8");
                 //设置请求编码
                 entity.setContentEncoding("utf-8");
@@ -157,12 +150,13 @@ public class HttpClientUtil {
             response = httpClient.execute(httpPost);
 
             resultString = EntityUtils.toString(response.getEntity(), "UTF-8");
-        } catch (Exception e) {
-            throw e;
         } finally {
             try {
-                response.close();
+                if (response != null) {
+                    response.close();
+                }
             } catch (IOException e) {
+                //noinspection CallToPrintStackTrace
                 e.printStackTrace();
             }
         }
