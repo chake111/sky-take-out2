@@ -8,7 +8,7 @@ import com.sky.vo.DishVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,11 +24,9 @@ import java.util.List;
 @Api(tags = "C端-菜品浏览接口")
 public class DishController {
     private final DishService dishService;
-    private final RedisTemplate<String, Object> redisTemplate;
 
-    public DishController(DishService dishService, RedisTemplate<String, Object> redisTemplate) {
+    public DishController(DishService dishService) {
         this.dishService = dishService;
-        this.redisTemplate = redisTemplate;
     }
 
     /**
@@ -36,19 +34,13 @@ public class DishController {
      */
     @GetMapping("/list")
     @ApiOperation("根据分类id查询菜品")
+    @Cacheable(cacheNames = "setmealCache", key = "#categoryId")
     public Result<List<DishVO>> list(Long categoryId) {
-        String key = "dish_" + categoryId;
-        List<DishVO> list = (List<DishVO>) redisTemplate.opsForValue().get(key);
-        if (list != null && !list.isEmpty()) {
-            return Result.success(list);
-        }
         //查询起售中的菜品
         Dish dish = new Dish();
         dish.setCategoryId(categoryId);
         dish.setStatus(StatusConstant.ENABLE);
-        list = dishService.listWithFlavor(dish);
-
-        redisTemplate.opsForValue().set(key,list);
+        List<DishVO> list = dishService.listWithFlavor(dish);
 
         return Result.success(list);
     }
